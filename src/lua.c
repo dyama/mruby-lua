@@ -2,6 +2,7 @@
 #include <mruby/class.h>
 #include <mruby/variable.h>
 #include <mruby/array.h>
+#include <mruby/hash.h>
 #include <mruby/string.h>
 #include <mruby/data.h>
 #include <mruby/variable.h>
@@ -35,15 +36,15 @@ mrb_value lua_to_mrb(mrb_state* mrb, lua_State* L, int index)
     case LUA_TNIL:
       result = mrb_nil_value();
       break;
-    case LUA_TNUMBER:
-      ;
-      lua_Integer n = lua_tointeger(L, index);
-      lua_Number  f = lua_tonumber(L, index);
-      if (n != f) {
-        result = mrb_float_value(mrb, f);
-      }
-      else {
-        result = mrb_fixnum_value(n);
+    case LUA_TNUMBER: {
+        lua_Integer n = lua_tointeger(L, index);
+        lua_Number  f = lua_tonumber(L, index);
+        if (n != f) {
+          result = mrb_float_value(mrb, f);
+        }
+        else {
+          result = mrb_fixnum_value(n);
+        }
       }
       break;
     case LUA_TBOOLEAN:
@@ -61,9 +62,20 @@ mrb_value lua_to_mrb(mrb_state* mrb, lua_State* L, int index)
         // Not impremented.
         result = mrb_nil_value();
       }
+      else {
+        //
+      }
       break;
-    case LUA_TTABLE:
-      result = mrb_str_new_cstr(mrb, "DEBUG");
+    case LUA_TTABLE: ;
+      result = mrb_hash_new(mrb);
+      index = lua_gettop(L);
+      lua_pushnil(L);
+      while (lua_next(L, index) != 0) {
+        mrb_value key = lua_to_mrb(mrb, L, -2);
+        mrb_value val = lua_to_mrb(mrb, L, -1);
+        mrb_hash_set(mrb, result, key, val);
+        lua_pop(L, 1);
+      }
       break;
     case LUA_TUSERDATA:
     case LUA_TLIGHTUSERDATA:
@@ -80,31 +92,37 @@ mrb_value mrb_lua_dostring(mrb_state* mrb, mrb_value self)
 {
   mrb_value str;
   mrb_get_args(mrb, "S", &str);
-  lua_State* L = DATA_PTR(self);
-  if (luaL_dostring(L, RSTRING_PTR(str))) {
-    mrb_raise(mrb, E_SCRIPT_ERROR, lua_tostring(L, -1));
+  {
+    lua_State* L = DATA_PTR(self);
+    if (luaL_dostring(L, RSTRING_PTR(str))) {
+      mrb_raise(mrb, E_SCRIPT_ERROR, lua_tostring(L, -1));
+    }
+    return lua_to_mrb(mrb, L, -1);
   }
-  return lua_to_mrb(mrb, L, -1);
 }
 
 mrb_value mrb_lua_dofile(mrb_state* mrb, mrb_value self)
 {
   mrb_value path;
   mrb_get_args(mrb, "S", &path);
-  lua_State* L = DATA_PTR(self);
-  if (luaL_dofile(L, RSTRING_PTR(path))) {
-    mrb_raise(mrb, E_SCRIPT_ERROR, lua_tostring(L, -1));
+  {
+    lua_State* L = DATA_PTR(self);
+    if (luaL_dofile(L, RSTRING_PTR(path))) {
+      mrb_raise(mrb, E_SCRIPT_ERROR, lua_tostring(L, -1));
+    }
+    return lua_to_mrb(mrb, L, -1);
   }
-  return lua_to_mrb(mrb, L, -1);
 }
 
 mrb_value mrb_lua_global(mrb_state* mrb, mrb_value self)
 {
   mrb_value key;
   mrb_get_args(mrb, "S", &key);
-  lua_State* L = DATA_PTR(self);
-  lua_getglobal(L, RSTRING_PTR(key));
-  return lua_to_mrb(mrb, L, -1);
+  {
+    lua_State* L = DATA_PTR(self);
+    lua_getglobal(L, RSTRING_PTR(key));
+    return lua_to_mrb(mrb, L, -1);
+  }
 }
 
 void mrb_mruby_lua_gem_init(mrb_state* mrb)
