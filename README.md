@@ -3,6 +3,12 @@
 **mruby-lua** calls Lua script engine from mruby.
 It provides to use many Lua scripts written for embedded host on mruby environment.
 
+## Dependency
+
+* liblua5.2 libraries and headers.
+
+I checked to build on Debian GNU/Linux x86, LMDE2 x64 and MinGW32 on MS-Windows7.
+
 ## Classes
 
 ### class Lua
@@ -19,7 +25,7 @@ Class Lua provides Lua script engine. It has a pointer to lua\_State structure.
 * `dostring(script_string) -> nil`
   - Run Lua script from string object.
 
-* `dostring(script_file_path) -> nil`
+* `dofile(script_file_path) -> nil`
   - Run Lua script from file.
 
 * `[key] -> object, [key] = object`
