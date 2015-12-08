@@ -19,7 +19,7 @@ void lua_final(mrb_state* mrb, void* p)
 
 static struct mrb_data_type class_lua_type = { "Lua", lua_final };
 
-mrb_value lua_init(mrb_state* mrb, mrb_value self)
+mrb_value mrb_lua_init(mrb_state* mrb, mrb_value self)
 {
   lua_State* L = luaL_newstate();
   luaL_openlibs(L);
@@ -76,7 +76,7 @@ mrb_value lua_to_mrb(mrb_state* mrb, lua_State* L, int index)
   return result;
 }
 
-mrb_value lua_dostring(mrb_state* mrb, mrb_value self)
+mrb_value mrb_lua_dostring(mrb_state* mrb, mrb_value self)
 {
   mrb_value str;
   mrb_get_args(mrb, "S", &str);
@@ -87,7 +87,7 @@ mrb_value lua_dostring(mrb_state* mrb, mrb_value self)
   return lua_to_mrb(mrb, L, -1);
 }
 
-mrb_value lua_dofile(mrb_state* mrb, mrb_value self)
+mrb_value mrb_lua_dofile(mrb_state* mrb, mrb_value self)
 {
   mrb_value path;
   mrb_get_args(mrb, "S", &path);
@@ -98,7 +98,7 @@ mrb_value lua_dofile(mrb_state* mrb, mrb_value self)
   return lua_to_mrb(mrb, L, -1);
 }
 
-mrb_value lua_global(mrb_state* mrb, mrb_value self)
+mrb_value mrb_lua_global(mrb_state* mrb, mrb_value self)
 {
   mrb_value key;
   mrb_get_args(mrb, "S", &key);
@@ -111,10 +111,10 @@ void mrb_mruby_lua_gem_init(mrb_state* mrb)
 {
   struct RClass* rclass = mrb_define_class(mrb, "Lua", mrb->object_class);
   MRB_SET_INSTANCE_TT(rclass, MRB_TT_DATA);
-  mrb_define_method(mrb, rclass, "initialize", lua_init,     MRB_ARGS_NONE());
-  mrb_define_method(mrb, rclass, "dostring",   lua_dostring, MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, rclass, "dofile",     lua_dofile,   MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, rclass, "[]",         lua_global,   MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, rclass, "initialize", mrb_lua_init,     MRB_ARGS_NONE());
+  mrb_define_method(mrb, rclass, "dostring",   mrb_lua_dostring, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, rclass, "dofile",     mrb_lua_dofile,   MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, rclass, "[]",         mrb_lua_global,   MRB_ARGS_REQ(1));
   return;
 }
 
