@@ -4,7 +4,6 @@
 
 ### Lua#dostring method
 
-
     lua = Lua.new
     
     script =<<"EOF"
@@ -21,7 +20,6 @@
 
 ### Lua#dofile method
 
-
     lua = Lua.new
     lua.dofile "test/fib.lua"
 
@@ -34,7 +32,7 @@ Get global variable from Lua.
     lua.dostring "a = 10; b = 20; c = a * b"
 
     p lua["a"] # => 10
-    p lua["c"] # => 20
+    p lua["b"] # => 20
     p lua["c"] # => 200
 
     lua.dostring "vec1 = { x = 0.0, y = 1.0, z = 3.0 }"
