@@ -1,5 +1,28 @@
 # mruby-lua
 
+**mruby-lua** calls Lua script engine from mruby.
+It provide to use many Lua scripts written for embedded host on mruby environment.
+
+## Classes
+
+### Lua
+
+#### Singleton methods
+
+* `new -> self`
+  - Create instance of Lua script engine.
+
+#### Instance methods
+
+* `dostring(script_string) -> nil`
+  - Run Lua script from string object.
+
+* `dostring(script_file_path) -> nil`
+  - Run Lua script from file.
+
+* `[key] -> object, [key] = object`
+  - Set or Get global variable from Lua.
+
 ## Examples
 
 ### Lua#dostring method
