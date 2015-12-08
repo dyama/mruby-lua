@@ -33,7 +33,11 @@ Get global variable from Lua.
 
     lua.dostring "a = 10; b = 20; c = a * b"
 
-    lua["a"] # => 10
-    lua["c"] # => 20
-    lua["c"] # => 200
+    p lua["a"] # => 10
+    p lua["c"] # => 20
+    p lua["c"] # => 200
+
+    lua.dostring "vec1 = { x = 0.0, y = 1.0, z = 3.0 }"
+    p lua["vec1"]
+    # => {"x"=>0, "y"=>1, "z"=>3}
 
