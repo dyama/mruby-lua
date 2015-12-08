@@ -11,14 +11,14 @@
 
 void luaL_openlibs(lua_State*);
 
-void lua_final(mrb_state* mrb, void* p)
+void mrb_lua_final(mrb_state* mrb, void* p)
 {
   lua_State* L = p;
   lua_close(L);
   // mrb_free(mrb, p);
 }
 
-static struct mrb_data_type class_lua_type = { "Lua", lua_final };
+static struct mrb_data_type class_lua_type = { "Lua", mrb_lua_final };
 
 mrb_value mrb_lua_init(mrb_state* mrb, mrb_value self)
 {
