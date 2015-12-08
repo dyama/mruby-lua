@@ -1,11 +1,13 @@
 # mruby-lua
 
 **mruby-lua** calls Lua script engine from mruby.
-It provide to use many Lua scripts written for embedded host on mruby environment.
+It provides to use many Lua scripts written for embedded host on mruby environment.
 
 ## Classes
 
-### Lua
+### class Lua
+
+Class Lua provides Lua script engine. It has a pointer to lua\_State structure.
 
 #### Singleton methods
 
