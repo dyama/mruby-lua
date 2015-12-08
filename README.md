@@ -39,3 +39,19 @@ Get global variable from Lua.
     p lua["vec1"]
     # => {"x"=>0, "y"=>1, "z"=>3}
 
+### Lua#[]= method
+
+Set global variable from Lua.
+
+    lua = Lua.new
+
+    lua["a"] = 123
+    lua["b"] = 23.45
+    lua["c"] = true
+    lua["d"] = nil
+
+    lua.dostring "print(a)" # => 123
+    lua.dostring "print(b)" # => 23.45
+    lua.dostring "print(c)" # => true
+    lua.dostring "print(d)" # => nil
+

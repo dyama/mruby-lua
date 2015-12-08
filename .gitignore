@@ -32,3 +32,4 @@
 *.dSYM/
 /src/*.c~
 /test/*.lua~
+/*.md~

@@ -59,11 +59,10 @@ mrb_value lua_to_mrb(mrb_state* mrb, lua_State* L, int index)
         result = mrb_cptr_value(mrb, cf);
       }
       else if (lua_isfunction(L, index)) {
-        // Not impremented.
-        result = mrb_nil_value();
+        mrb_raise(mrb, E_NOTIMP_ERROR, "Not implemented.");
       }
       else {
-        //
+        mrb_raise(mrb, E_NOTIMP_ERROR, "Not implemented.");
       }
       break;
     case LUA_TTABLE: ;
@@ -81,58 +80,102 @@ mrb_value lua_to_mrb(mrb_state* mrb, lua_State* L, int index)
     case LUA_TLIGHTUSERDATA:
     case LUA_TTHREAD:
     default:
-        // Not impremented.
-      result = mrb_nil_value();
+      mrb_raise(mrb, E_NOTIMP_ERROR, "Not implemented.");
       break;
   }
   return result;
 }
 
+inline int __mrb_bool_p(mrb_value o)
+{
+  return mrb_type(o) == MRB_TT_FALSE || mrb_type(o) == MRB_TT_TRUE;
+}
+
+void mrb_to_lua(mrb_state* mrb, lua_State* L, mrb_value val)
+{
+  if (mrb_nil_p(val)) {
+    lua_pushnil(L);
+  }
+  else if (mrb_fixnum_p(val)) {
+    lua_pushinteger(L, mrb_fixnum(val));
+  }
+  else if (mrb_float_p(val)) {
+    lua_pushnumber(L, mrb_float(val));
+  }
+  else if (mrb_string_p(val)) {
+    lua_pushstring(L, RSTRING_PTR(val));
+  }
+  else if (mrb_array_p(val)) {
+    mrb_raise(mrb, E_NOTIMP_ERROR, "Not implemented.");
+  }
+  else if (mrb_hash_p(val)) {
+    mrb_raise(mrb, E_NOTIMP_ERROR, "Not implemented.");
+  }
+  else if (mrb_cptr_p(val)) {
+    lua_pushcfunction(L, mrb_cptr(val));
+  }
+  else if (mrb_exception_p(val)) {
+    mrb_raise(mrb, E_TYPE_ERROR, "Not support type specified.");
+  }
+  else if (__mrb_bool_p(val)) {
+    lua_pushboolean(L, mrb_bool(val));
+  }
+  else {
+    mrb_raise(mrb, E_TYPE_ERROR, "Not support type specified.");
+  }
+  return;
+}
+
 mrb_value mrb_lua_dostring(mrb_state* mrb, mrb_value self)
 {
+  lua_State* L = DATA_PTR(self);
   mrb_value str;
   mrb_get_args(mrb, "S", &str);
-  {
-    lua_State* L = DATA_PTR(self);
-    if (luaL_dostring(L, RSTRING_PTR(str))) {
-      mrb_raise(mrb, E_SCRIPT_ERROR, lua_tostring(L, -1));
-    }
-    return lua_to_mrb(mrb, L, -1);
+  if (luaL_dostring(L, RSTRING_PTR(str))) {
+    mrb_raise(mrb, E_SCRIPT_ERROR, lua_tostring(L, -1));
   }
+  return lua_to_mrb(mrb, L, -1);
 }
 
 mrb_value mrb_lua_dofile(mrb_state* mrb, mrb_value self)
 {
+  lua_State* L = DATA_PTR(self);
   mrb_value path;
   mrb_get_args(mrb, "S", &path);
-  {
-    lua_State* L = DATA_PTR(self);
-    if (luaL_dofile(L, RSTRING_PTR(path))) {
-      mrb_raise(mrb, E_SCRIPT_ERROR, lua_tostring(L, -1));
-    }
-    return lua_to_mrb(mrb, L, -1);
+  if (luaL_dofile(L, RSTRING_PTR(path))) {
+    mrb_raise(mrb, E_SCRIPT_ERROR, lua_tostring(L, -1));
   }
+  return lua_to_mrb(mrb, L, -1);
 }
 
-mrb_value mrb_lua_global(mrb_state* mrb, mrb_value self)
+mrb_value mrb_lua_getglobal(mrb_state* mrb, mrb_value self)
 {
+  lua_State* L = DATA_PTR(self);
   mrb_value key;
   mrb_get_args(mrb, "S", &key);
-  {
-    lua_State* L = DATA_PTR(self);
-    lua_getglobal(L, RSTRING_PTR(key));
-    return lua_to_mrb(mrb, L, -1);
-  }
+  lua_getglobal(L, RSTRING_PTR(key));
+  return lua_to_mrb(mrb, L, -1);
+}
+
+mrb_value mrb_lua_setglobal(mrb_state* mrb, mrb_value self)
+{
+  lua_State* L = DATA_PTR(self);
+  mrb_value key, val;
+  mrb_get_args(mrb, "So", &key, &val);
+  mrb_to_lua(mrb, L, val);
+  lua_setglobal(L, RSTRING_PTR(key));
+  return mrb_nil_value();
 }
 
 void mrb_mruby_lua_gem_init(mrb_state* mrb)
 {
   struct RClass* rclass = mrb_define_class(mrb, "Lua", mrb->object_class);
   MRB_SET_INSTANCE_TT(rclass, MRB_TT_DATA);
-  mrb_define_method(mrb, rclass, "initialize", mrb_lua_init,     MRB_ARGS_NONE());
-  mrb_define_method(mrb, rclass, "dostring",   mrb_lua_dostring, MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, rclass, "dofile",     mrb_lua_dofile,   MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, rclass, "[]",         mrb_lua_global,   MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, rclass, "initialize", mrb_lua_init,      MRB_ARGS_NONE());
+  mrb_define_method(mrb, rclass, "dostring",   mrb_lua_dostring,  MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, rclass, "dofile",     mrb_lua_dofile,    MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, rclass, "[]",         mrb_lua_getglobal, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, rclass, "[]=",        mrb_lua_setglobal, MRB_ARGS_REQ(2));
   return;
 }
 
