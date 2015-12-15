@@ -86,3 +86,21 @@ Set global variable from Lua.
     lua.dostring "print(c)" # => true
     lua.dostring "print(d)" # => nil
 
+## Supported data convertion
+
+|MRuby type|To Lua|From Lua|Lua type     |
+|:--------:|:----:|:------:|:-----------:|
+|Nil       | o    | o      |NIL          |
+|Fixnum    | o    | o      |NUMBER       |
+|Float     | o    | o      |NUMBER       |
+|String    | o    | o      |STRING       |
+|array     |      |        |TABLE        |
+|hash      |      | o      |TABLE        |
+|C pointer |      | o      |FUNCTION(c)  |
+| -        |      |        |FUNCTION     |
+|Exception |      |        | -           |
+|Bool      | o    | o      |BOOLEAN      |
+| -        |      |        |USERDATA     |
+| -        |      |        |LIGHTUSERDATA|
+| -        |      |        |THREAD       |
+
