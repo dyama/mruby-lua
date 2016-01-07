@@ -72,7 +72,7 @@ Get global variable from Lua.
 
 ### Lua#[]= method
 
-Set global variable from Lua.
+Set global variable to Lua.
 
     lua = Lua.new
 
