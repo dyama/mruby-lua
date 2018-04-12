@@ -86,7 +86,7 @@ mrb_value lua_to_mrb(mrb_state* mrb, lua_State* L, int index)
   return result;
 }
 
-inline int __mrb_bool_p(mrb_value o)
+static inline int __mrb_bool_p(mrb_value o)
 {
   return mrb_type(o) == MRB_TT_FALSE || mrb_type(o) == MRB_TT_TRUE;
 }
